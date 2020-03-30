@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <vector>
 
 using namespace std;
 
@@ -13,10 +14,11 @@ int main(int argc, char *argv[])
   struct addrinfo host_info;
   struct addrinfo *host_info_list;
   const char *hostname = argv[1];
+  const char *message = argv[2];
   const char *port     = "12345";
   
   if (argc < 2) {
-      cout << "Syntax: client <hostname>\n" << endl;
+      cout << "Syntax: client <hostname> <message>\n" << endl;
       return 1;
   }
 
@@ -49,8 +51,9 @@ int main(int argc, char *argv[])
     return -1;
   } //if
 
-  const char *message = "hi there!";
+  //  const char *message = "5,10\n";
   send(socket_fd, message, strlen(message), 0);
+  
 
   freeaddrinfo(host_info_list);
   close(socket_fd);

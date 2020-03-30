@@ -3,11 +3,24 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <vector>
+#include "server.hpp"
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+  
+  //Check if the number of command line arguments is correct
+  if (argc != 2) {
+    cerr << "Wrong number of command line arguments\n Usage: server <num_of_buckets>\n";
+    exit(EXIT_FAILURE);
+  }
+
+  //Initialize the buckets
+  int buckNum = stoi(argv[1]);
+  vector<int> buckets(buckNum,0);
+  
   int status;
   int socket_fd;
   struct addrinfo host_info;
@@ -63,12 +76,12 @@ int main(int argc, char *argv[])
     return -1;
   } //if
 
-  char buffer[512];
-  recv(client_connection_fd, buffer, 9, 0);
-  buffer[9] = 0;
+  char buffer[20];
+  memset(buffer, '\0', sizeof(buffer));
+  recv(client_connection_fd, buffer, 20, 0);
 
   cout << "Server received: " << buffer << endl;
-
+  
   freeaddrinfo(host_info_list);
   close(socket_fd);
 
