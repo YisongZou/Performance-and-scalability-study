@@ -22,6 +22,8 @@ int main(int argc, char *argv[])
       return 1;
   }
 
+  while(1){
+
   memset(&host_info, 0, sizeof(host_info));
   host_info.ai_family   = AF_UNSPEC;
   host_info.ai_socktype = SOCK_STREAM;
@@ -43,17 +45,24 @@ int main(int argc, char *argv[])
   } //if
   
   cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
-  
+
   status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
   if (status == -1) {
     cerr << "Error: cannot connect to socket" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
     return -1;
   } //if
-
+  
   const char *message = "5,10\n";
   send(socket_fd, message, strlen(message), 0);
-  
+
+  char buffer[20];
+  memset(buffer, '\0', sizeof(buffer));
+  recv(socket_fd, buffer, 20, 0);
+  string result(buffer);
+  int res = stoi(result);
+  cout << "Result is: " << res <<endl;
+ }
 
   freeaddrinfo(host_info_list);
   close(socket_fd);

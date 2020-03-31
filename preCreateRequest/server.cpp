@@ -4,9 +4,55 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <vector>
+#include <thread>
+#include <mutex>
+#include <sys/time.h>
+
+//Thread Pool Library for c++
+#include "ctpl_stl.h"
+
 #include "server.hpp"
 
 using namespace std;
+
+//Protects buckets
+std::mutex buckets_mutex;
+//Store the buckets
+vector<int> buckets;
+
+void threadFunc(int id, int client_connection_fd){
+  char buffer[20];
+  memset(buffer, '\0', sizeof(buffer));
+  recv(client_connection_fd, buffer, 20, 0);
+
+  int count;
+  int position;
+  string message(buffer);
+  messageParser(count,position,message);
+  cout <<"Thread Id:" << id << " Server received: " << count << " " << position << endl;
+
+  //delay loop
+  struct timeval start, check;
+  double elapsed_seconds;
+  gettimeofday(&start, NULL);
+  do {
+    gettimeofday(&check, NULL);
+    elapsed_seconds = (check.tv_sec + (check.tv_usec/1000000.0)) - (start.tv_sec + (start.tv_usec/1000000.0));
+  } while (elapsed_seconds < count);
+
+  const lock_guard<mutex> lock(buckets_mutex);//Lock guard for buckets
+  buckets[position] += count;
+  for(size_t i = 0 ; i < buckets.size(); i++){
+    cout<< buckets[i] << " " ;
+  }
+  string temp = to_string(buckets[position]);
+  const char *result = temp.c_str();
+  send(client_connection_fd, result, strlen(result), 0);
+  
+}
+
+
+
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +65,9 @@ int main(int argc, char *argv[])
 
   //Initialize the buckets
   int buckNum = stoi(argv[1]);
-  vector<int> buckets(buckNum,0);
+  for(int i = 0 ; i < buckNum; ++i){
+    buckets.push_back(0);
+  }
   
   int status;
   int socket_fd;
@@ -67,25 +115,22 @@ int main(int argc, char *argv[])
   } //if
 
   cout << "Waiting for connection on port " << port << endl;
-  struct sockaddr_storage socket_addr;
-  socklen_t socket_addr_len = sizeof(socket_addr);
-  int client_connection_fd;
+
+
+  //Pre create the threads 
+  ctpl::thread_pool p(100 /* 100 threads in the pool */);
+  
+  while(1){
+    struct sockaddr_storage socket_addr;
+    socklen_t socket_addr_len = sizeof(socket_addr);
+    int client_connection_fd;
   client_connection_fd = accept(socket_fd, (struct sockaddr *)&socket_addr, &socket_addr_len);
   if (client_connection_fd == -1) {
     cerr << "Error: cannot accept connection on socket" << endl;
-    return -1;
-  } //if
+  } //if 
+    p.push(threadFunc,client_connection_fd);
 
-  char buffer[20];
-  memset(buffer, '\0', sizeof(buffer));
-  recv(client_connection_fd, buffer, 20, 0);
-
-  int count;
-  int position;
-  string message(buffer);
-  messageParser(count,position,message);
-
-  cout << "Server received: " << count << " " << position << endl;
+    }
   
   freeaddrinfo(host_info_list);
   close(socket_fd);
