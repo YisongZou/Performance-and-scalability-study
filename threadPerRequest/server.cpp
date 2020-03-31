@@ -7,16 +7,65 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <thread>
+#include <vector>
+#include <iostream>
+#include <cstring>
+#include <mutex>
+#include <sys/time.h>
+#include "server.hpp"
 
 using namespace std;
 
-void show()
-{
-        cout << "thread"<< endl;
+//Store the buckets
+vector<int> buckets;
+
+//Protects buckets
+std::mutex buckets_mutex;
+
+void threadFunc(int id, int client_connection_fd){
+  char buffer[50];
+  memset(buffer, '\0', sizeof(buffer));
+  recv(client_connection_fd, buffer, 50, 0);
+
+  int count;
+  int position;
+  string message(buffer);
+  messageParser(count,position,message);
+  cout <<"Thread Id:" << id << " Server received: " << count << " " << position << endl;
+
+  //delay loop
+  struct timeval start, check;
+  double elapsed_seconds;
+  gettimeofday(&start, NULL);
+  do {
+    gettimeofday(&check, NULL);
+    elapsed_seconds = (check.tv_sec + (check.tv_usec/1000000.0)) - (start.tv_sec + (start.tv_usec/1000000.0));
+  } while (elapsed_seconds < count);
+
+  const lock_guard<mutex> lock(buckets_mutex);//Lock guard for buckets
+  buckets[position] += count;
+  //  for(size_t i = 0 ; i < buckets.size(); i++){
+  //  cout<< buckets[i] << " " ;
+  // }
+  string temp = to_string(buckets[position]);
+  const char *result = temp.c_str();
+  send(client_connection_fd, result, strlen(result), 0);
 }
 
 int main(int argc, char *argv[])
 {
+  //Check if the number of command line arguments is correct
+  if (argc != 2) {
+    cerr << "Wrong number of command line arguments\n Usage: server <num_of_buckets>\n";
+    exit(EXIT_FAILURE);
+  }
+
+  //Initialize the buckets
+  int buckNum = stoi(argv[1]);
+  for(int i = 0 ; i < buckNum; ++i){
+    buckets.push_back(0);
+  }
+  int id = 0;
   int status;
   int socket_fd;
   struct addrinfo host_info;
@@ -75,10 +124,10 @@ try {
           cerr << "Error: cannot accept connection on socket" << endl;
           return -1;
         }
-
-      thread t(show);
+      id++;
+      thread t(threadFunc,id,client_connection_fd);
       //t.detach();
-      t.join();
+      //t.join();
     }
     freeaddrinfo(host_info_list);
     close(socket_fd);
