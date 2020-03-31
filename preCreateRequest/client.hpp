@@ -47,12 +47,12 @@ void threadFunc(int id, const char * hostname, const char *port){
     //return -1;
   } //if
   
-  const char *message = "1,4\n";
+  const char *message = "10,4\n";
   send(socket_fd, message, strlen(message), 0);
 
-  char buffer[20];
+  char buffer[50];
   memset(buffer, '\0', sizeof(buffer));
-  recv(socket_fd, buffer, 20, 0);
+  recv(socket_fd, buffer, 50, 0);
   string result(buffer);
   int res = stoi(result);
   cout <<"Id: " << id << " Result is: " << res <<endl;

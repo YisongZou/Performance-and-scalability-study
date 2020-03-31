@@ -22,9 +22,9 @@ vector<int> buckets;
 std::mutex buckets_mutex;
 
 void threadFunc(int id, int client_connection_fd){
-  char buffer[20];
+  char buffer[50];
   memset(buffer, '\0', sizeof(buffer));
-  recv(client_connection_fd, buffer, 20, 0);
+  recv(client_connection_fd, buffer, 50, 0);
 
   int count;
   int position;
