@@ -80,7 +80,12 @@ int main(int argc, char *argv[])
   memset(buffer, '\0', sizeof(buffer));
   recv(client_connection_fd, buffer, 20, 0);
 
-  cout << "Server received: " << buffer << endl;
+  int count;
+  int position;
+  string message(buffer);
+  messageParser(count,position,message);
+
+  cout << "Server received: " << count << " " << position << endl;
   
   freeaddrinfo(host_info_list);
   close(socket_fd);
