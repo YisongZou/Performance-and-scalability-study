@@ -21,3 +21,4 @@ void messageParser(int & count, int & position, string message){
   count = stoi(sCount);
   position = stoi(sPosition);
 }
+

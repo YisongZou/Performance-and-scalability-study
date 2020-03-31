@@ -5,7 +5,7 @@ clean:
 	rm -f $(TARGETS)
 
 client: client.cpp
-	g++ -g -o $@ $<
+	g++ -pthread -o client client.cpp
 
 server: server.cpp
 	g++ -pthread -o server server.cpp

@@ -4,15 +4,16 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <vector>
+#include <thread>
+
+//Thread Pool Library for c++ 
+#include "ctpl_stl.h"
+#include "client.hpp"
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
-  int status;
-  int socket_fd;
-  struct addrinfo host_info;
-  struct addrinfo *host_info_list;
   const char *hostname = argv[1];
   //const char *message = argv[2];
   const char *port     = "12345";
@@ -22,50 +23,11 @@ int main(int argc, char *argv[])
       return 1;
   }
 
-  while(1){
+  //Pre create the threads
+  ctpl::thread_pool p(200 /* 200 threads in the pool */);
 
-  memset(&host_info, 0, sizeof(host_info));
-  host_info.ai_family   = AF_UNSPEC;
-  host_info.ai_socktype = SOCK_STREAM;
-
-  status = getaddrinfo(hostname, port, &host_info, &host_info_list);
-  if (status != 0) {
-    cerr << "Error: cannot get address info for host" << endl;
-    cerr << "  (" << hostname << "," << port << ")" << endl;
-    return -1;
-  } //if
-
-  socket_fd = socket(host_info_list->ai_family, 
-		     host_info_list->ai_socktype, 
-		     host_info_list->ai_protocol);
-  if (socket_fd == -1) {
-    cerr << "Error: cannot create socket" << endl;
-    cerr << "  (" << hostname << "," << port << ")" << endl;
-    return -1;
-  } //if
-  
-  cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
-
-  status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
-  if (status == -1) {
-    cerr << "Error: cannot connect to socket" << endl;
-    cerr << "  (" << hostname << "," << port << ")" << endl;
-    return -1;
-  } //if
-  
-  const char *message = "5,10\n";
-  send(socket_fd, message, strlen(message), 0);
-
-  char buffer[20];
-  memset(buffer, '\0', sizeof(buffer));
-  recv(socket_fd, buffer, 20, 0);
-  string result(buffer);
-  int res = stoi(result);
-  cout << "Result is: " << res <<endl;
- }
-
-  freeaddrinfo(host_info_list);
-  close(socket_fd);
-
+  for(int i = 0; i < 200; i++){
+    p.push(threadFunc,hostname,port);    
+  }
   return 0;
 }

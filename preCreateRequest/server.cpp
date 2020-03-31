@@ -15,10 +15,11 @@
 
 using namespace std;
 
-//Protects buckets
-std::mutex buckets_mutex;
 //Store the buckets
 vector<int> buckets;
+
+//Protects buckets
+std::mutex buckets_mutex;
 
 void threadFunc(int id, int client_connection_fd){
   char buffer[20];
@@ -42,20 +43,21 @@ void threadFunc(int id, int client_connection_fd){
 
   const lock_guard<mutex> lock(buckets_mutex);//Lock guard for buckets
   buckets[position] += count;
-  for(size_t i = 0 ; i < buckets.size(); i++){
-    cout<< buckets[i] << " " ;
-  }
+  //  for(size_t i = 0 ; i < buckets.size(); i++){
+  //  cout<< buckets[i] << " " ;
+  // }
   string temp = to_string(buckets[position]);
   const char *result = temp.c_str();
   send(client_connection_fd, result, strlen(result), 0);
-  
+
 }
-
-
 
 
 int main(int argc, char *argv[])
 {
+
+  //Pre create the threads
+  ctpl::thread_pool p(200 /* 200 threads in the pool */);
   
   //Check if the number of command line arguments is correct
   if (argc != 2) {
@@ -68,7 +70,7 @@ int main(int argc, char *argv[])
   for(int i = 0 ; i < buckNum; ++i){
     buckets.push_back(0);
   }
-  
+
   int status;
   int socket_fd;
   struct addrinfo host_info;
@@ -116,24 +118,19 @@ int main(int argc, char *argv[])
 
   cout << "Waiting for connection on port " << port << endl;
 
-
-  //Pre create the threads 
-  ctpl::thread_pool p(100 /* 100 threads in the pool */);
-  
   while(1){
     struct sockaddr_storage socket_addr;
     socklen_t socket_addr_len = sizeof(socket_addr);
     int client_connection_fd;
-  client_connection_fd = accept(socket_fd, (struct sockaddr *)&socket_addr, &socket_addr_len);
-  if (client_connection_fd == -1) {
-    cerr << "Error: cannot accept connection on socket" << endl;
-  } //if 
+    client_connection_fd = accept(socket_fd, (struct sockaddr *)&socket_addr, &socket_addr_len);
+    if (client_connection_fd == -1) {
+      cerr << "Error: cannot accept connection on socket" << endl;
+    } //if  
     p.push(threadFunc,client_connection_fd);
+  }
 
-    }
-  
-  freeaddrinfo(host_info_list);
+   freeaddrinfo(host_info_list);
   close(socket_fd);
-
+  
   return 0;
 }
