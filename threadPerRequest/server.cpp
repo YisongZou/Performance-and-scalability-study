@@ -126,7 +126,7 @@ try {
         }
       id++;
       thread t(threadFunc,id,client_connection_fd);
-      //t.detach();
+      t.detach();
       //t.join();
     }
     freeaddrinfo(host_info_list);

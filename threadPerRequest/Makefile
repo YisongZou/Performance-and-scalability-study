@@ -4,8 +4,8 @@ all: $(TARGETS)
 clean:
 	rm -f $(TARGETS)
 
-client: client.cpp
+client: client.cpp client.hpp
 	g++ -pthread -o client client.cpp
 
-server: server.cpp
+server: server.cpp server.hpp
 	g++ -pthread -o server server.cpp
