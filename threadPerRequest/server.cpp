@@ -129,9 +129,9 @@ try {
       t.detach();
       //t.join();
     }
-    freeaddrinfo(host_info_list);
-    close(socket_fd);
-  }
+     freeaddrinfo(host_info_list);
+      close(socket_fd);
+ }
   catch (std::exception &e) {
     cerr << "Error happens" << e.what() << endl;
     return -1;

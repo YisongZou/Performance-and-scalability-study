@@ -14,20 +14,20 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-  const char *hostname = argv[1];
-  //const char *message = argv[2];
-  const char *port     = "12345";
-  
-  if (argc != 2) {
-      cout << "Syntax: client <hostname>\n" << endl;
+  if (argc != 3) {
+      cout << "Syntax: client <hostname> <num_of_buckets>\n" << endl;
       return 1;
   }
+  const char *hostname = argv[1];
+  int bucketNum = stoi(argv[2]);
+  const char *port     = "12345";
+
 
   //Pre create the threads
-  ctpl::thread_pool p(200 /* 200 threads in the pool */);
+  ctpl::thread_pool p(50 /* 200 threads in the pool */);
 
-  for(int i = 0; i < 200; i++){
-    p.push(threadFunc,hostname,port);    
+  for(int i = 0; i < 50; i++){
+    p.push(threadFunc,hostname,port,bucketNum);    
   }
   return 0;
 }

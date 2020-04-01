@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 {
 
   //Pre create the threads
-  ctpl::thread_pool p(200 /* 200 threads in the pool */);
+  ctpl::thread_pool p(1000 /* 1000 threads in the pool */);
   
   //Check if the number of command line arguments is correct
   if (argc != 2) {

@@ -6,12 +6,13 @@
 #include <vector>
 #include <thread>
 
+
 //Thread Pool Library for c++ 
 #include "ctpl_stl.h"
 
 
 using namespace std;
-void threadFunc(int id, const char * hostname, const char *port){
+void threadFunc(int id, const char * hostname, const char *port, int bucketNum){
   while(1){
     int status;
     int socket_fd;
@@ -46,8 +47,11 @@ void threadFunc(int id, const char * hostname, const char *port){
     cerr << "  (" << hostname << "," << port << ")" << endl;
     //return -1;
   } //if
-  
-  const char *message = "10,4\n";
+
+  int delay = rand() % (3 - 1 + 1) + 1;
+  int bucket = rand() % ((bucketNum-1) - 0 + 1) + 0;
+  string temp = to_string(delay) + "," + to_string(bucket) + "\n";
+  const char *message = temp.c_str();
   send(socket_fd, message, strlen(message), 0);
 
   char buffer[50];
