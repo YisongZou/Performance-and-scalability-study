@@ -21,7 +21,7 @@ vector<int> buckets;
 //Protects buckets
 std::mutex buckets_mutex;
 
-void threadFunc(int id, int client_connection_fd){
+void threadFunc(int id, int client_connection_fd,int &num){
   char buffer[50];
   memset(buffer, '\0', sizeof(buffer));
   recv(client_connection_fd, buffer, 50, 0);
@@ -30,7 +30,7 @@ void threadFunc(int id, int client_connection_fd){
   int position;
   string message(buffer);
   messageParser(count,position,message);
-  cout <<"Thread Id:" << id << " Server received: " << count << " " << position << endl;
+  cout <<"Number of request:" << num << " Server received: " << count << " " << position << endl;
 
   //delay loop
   struct timeval start, check;
@@ -49,15 +49,18 @@ void threadFunc(int id, int client_connection_fd){
   string temp = to_string(buckets[position]);
   const char *result = temp.c_str();
   send(client_connection_fd, result, strlen(result), 0);
-
+  close(client_connection_fd);
+  num ++;
 }
 
 
 int main(int argc, char *argv[])
 {
+  //Count the num of requests
+  int num = 0;
 
   //Pre create the threads
-  ctpl::thread_pool p(1000 /* 1000 threads in the pool */);
+  ctpl::thread_pool p(8000 /* 1000 threads in the pool */);
   
   //Check if the number of command line arguments is correct
   if (argc != 2) {
@@ -125,8 +128,9 @@ int main(int argc, char *argv[])
     client_connection_fd = accept(socket_fd, (struct sockaddr *)&socket_addr, &socket_addr_len);
     if (client_connection_fd == -1) {
       cerr << "Error: cannot accept connection on socket" << endl;
+      continue;
     } //if  
-    p.push(threadFunc,client_connection_fd);
+    p.push(threadFunc,client_connection_fd,ref(num));
   }
 
    freeaddrinfo(host_info_list);
