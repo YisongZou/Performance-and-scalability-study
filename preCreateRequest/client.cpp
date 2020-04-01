@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
 
 
   //Pre create the threads
-  ctpl::thread_pool p(4000 /* 200 threads in the pool */);
+  ctpl::thread_pool p(700 /* 750 threads in the pool */);
 
-  for(int i = 0; i < 4000; i++){
+  for(int i = 0; i < 700; i++){
     p.push(threadFunc,hostname,port,bucketNum);    
   }
   return 0;

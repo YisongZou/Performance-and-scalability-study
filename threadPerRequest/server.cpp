@@ -31,7 +31,7 @@ void threadFunc(int & id, int client_connection_fd){
   int position;
   string message(buffer);
   messageParser(count,position,message);
-  cout <<"Number of request:" << id << " Server received: " << count << " " << position << endl;
+  //  cout <<"Number of request:" << id << " Server received: " << count << " " << position << endl;
 
   //delay loop
   struct timeval start, check;
@@ -51,6 +51,7 @@ void threadFunc(int & id, int client_connection_fd){
   const char *result = temp.c_str();
   send(client_connection_fd, result, strlen(result), 0);
   close(client_connection_fd);
+  cout <<"Number of request:" << id << " Server received: " << count << " " << position << endl;
   id++;
 }
 
@@ -115,8 +116,14 @@ int main(int argc, char *argv[])
 
   cout << "Waiting for connection on port " << port << endl;
 
-try {
-    while (1) {
+struct timeval start, check;
+  double elapsed_seconds;
+  gettimeofday(&start, NULL);
+
+  try {
+    do {
+       gettimeofday(&check, NULL);
+       elapsed_seconds = (check.tv_sec + (check.tv_usec/1000000.0)) - (start.tv_sec + (start.tv_usec/1000000.0));
       struct sockaddr_storage socket_addr;
       socklen_t socket_addr_len = sizeof(socket_addr);
       int client_connection_fd;
@@ -129,7 +136,7 @@ try {
 	thread t(threadFunc,ref(id),client_connection_fd);
       t.detach();
       //t.join();
-    }
+    }while (elapsed_seconds < 20);
      freeaddrinfo(host_info_list);
       close(socket_fd);
  }
