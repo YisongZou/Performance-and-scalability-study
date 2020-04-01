@@ -11,7 +11,9 @@ void messageParser(int & count, int & position, string message){
       sCount.push_back(message[i]);
       i++;
     }
+    else{
     break;
+    }
   }
   i++;
   while(i < message.size()){

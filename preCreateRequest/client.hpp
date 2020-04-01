@@ -47,7 +47,7 @@ void threadFunc(int id, const char * hostname, const char *port){
     //return -1;
   } //if
   
-  const char *message = "10,4\n";
+  const char *message = "1,4\n";
   send(socket_fd, message, strlen(message), 0);
 
   char buffer[50];
