@@ -22,7 +22,7 @@ vector<int> buckets;
 //Protects buckets
 std::mutex buckets_mutex;
 
-void threadFunc(int & id, int client_connection_fd){
+void threadFunc(int id,int client_connection_fd){
   char buffer[50];
   memset(buffer, '\0', sizeof(buffer));
   recv(client_connection_fd, buffer, 50, 0);
@@ -31,7 +31,7 @@ void threadFunc(int & id, int client_connection_fd){
   int position;
   string message(buffer);
   messageParser(count,position,message);
-  //  cout <<"Number of request:" << id << " Server received: " << count << " " << position << endl;
+  cout <<"Number of Request:"<< id << " Server received: " << count << " " << position << endl;
 
   //delay loop
   struct timeval start, check;
@@ -51,8 +51,8 @@ void threadFunc(int & id, int client_connection_fd){
   const char *result = temp.c_str();
   send(client_connection_fd, result, strlen(result), 0);
   close(client_connection_fd);
-  cout <<"Number of request:" << id << " Server received: " << count << " " << position << endl;
-  id++;
+  //cout <<"Number of request:" << id << " Server received: " << count << " " << position << endl;
+  // id++;
 }
 
 int main(int argc, char *argv[])
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
   for(int i = 0 ; i < buckNum; ++i){
     buckets.push_back(0);
   }
-  int id = 0;
+  int id = 1;
   int status;
   int socket_fd;
   struct addrinfo host_info;
@@ -133,10 +133,11 @@ struct timeval start, check;
           cerr << "Error: cannot accept connection on socket" << endl;
 	  continue;
         }
-	thread t(threadFunc,ref(id),client_connection_fd);
+	thread t(threadFunc,id,client_connection_fd);
       t.detach();
+      id++;
       //t.join();
-    }while (elapsed_seconds < 20);
+    }while (elapsed_seconds < 300);
      freeaddrinfo(host_info_list);
       close(socket_fd);
  }

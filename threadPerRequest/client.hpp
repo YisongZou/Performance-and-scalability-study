@@ -27,7 +27,8 @@ void threadFunc(int id, const char * hostname, const char *port, int bucketNum){
   if (status != 0) {
     cerr << "Error: cannot get address info for host" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
-    // return -1;
+     freeaddrinfo(host_info_list);
+     continue;
   } //if
 
   socket_fd = socket(host_info_list->ai_family, 
@@ -36,18 +37,22 @@ void threadFunc(int id, const char * hostname, const char *port, int bucketNum){
   if (socket_fd == -1) {
     cerr << "Error: cannot create socket" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
-    //return -1;
+    freeaddrinfo(host_info_list);
+    close(socket_fd);
+    continue;
   } //if
   
-  cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
+  //  cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
 
   status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
   if (status == -1) {
     cerr << "Error: cannot connect to socket" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
-    //return -1;
+    freeaddrinfo(host_info_list);
+    close(socket_fd);
+    continue;
   } //if
-
+  
   int delay = rand() % (3 - 1 + 1) + 1;
   int bucket = rand() % ((bucketNum-1) - 0 + 1) + 0;
   string temp = to_string(delay) + "," + to_string(bucket) + "\n";
@@ -59,7 +64,7 @@ void threadFunc(int id, const char * hostname, const char *port, int bucketNum){
   recv(socket_fd, buffer, 50, 0);
   string result(buffer);
   int res = stoi(result);
-  cout <<"Id: " << id << " Result is: " << res <<endl;
+  cout <<"Bucket: " << bucket << " Result is: " << res <<endl;
   
   freeaddrinfo(host_info_list);
   close(socket_fd);

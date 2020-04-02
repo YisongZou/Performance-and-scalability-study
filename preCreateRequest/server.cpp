@@ -21,7 +21,7 @@ vector<int> buckets;
 //Protects buckets
 std::mutex buckets_mutex;
 
-void threadFunc(int id, int client_connection_fd,int &num){
+void threadFunc(int id, int num,int client_connection_fd){
   char buffer[50];
   memset(buffer, '\0', sizeof(buffer));
   recv(client_connection_fd, buffer, 50, 0);
@@ -30,7 +30,7 @@ void threadFunc(int id, int client_connection_fd,int &num){
   int position;
   string message(buffer);
   messageParser(count,position,message);
-  //  cout <<"Number of request:" << num << " Server received: " << count << " " << position << endl;
+  cout <<"Number of Request:" << num << " Server received: " << count << " " << position << endl; 
 
   //delay loop
   struct timeval start, check;
@@ -50,18 +50,18 @@ void threadFunc(int id, int client_connection_fd,int &num){
   const char *result = temp.c_str();
   send(client_connection_fd, result, strlen(result), 0);
   close(client_connection_fd);
-  cout <<"Number of request:" << num << " Server received: " << count << " " << position << endl;
-  num ++;
+  //cout <<"Number of request:" << num << " Server received: " << count << " " << position << endl;
+  //num ++;
 }
 
 
 int main(int argc, char *argv[])
 {
   //Count the num of requests
- int num = 0;
+ int num = 1;
 
   //Pre create the threads
-  ctpl::thread_pool p(700 /* 700 threads in the pool */);
+  ctpl::thread_pool p(2000 /* 700 threads in the pool */);
   
   //Check if the number of command line arguments is correct
   if (argc != 2) {
@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
   do{
     gettimeofday(&check, NULL);
     elapsed_seconds = (check.tv_sec + (check.tv_usec/1000000.0)) - (start.tv_sec + (start.tv_usec/1000000.0));
+    //while(1){
     struct sockaddr_storage socket_addr;
     socklen_t socket_addr_len = sizeof(socket_addr);
     int client_connection_fd;
@@ -137,9 +138,11 @@ int main(int argc, char *argv[])
       cerr << "Error: cannot accept connection on socket" << endl;
       continue;
     } //if  
-    p.push(threadFunc,client_connection_fd,ref(num));
-  }while (elapsed_seconds < 20);
-
+    p.push(threadFunc,num,client_connection_fd);
+    //cout<< "Number of Requests:"<< num << endl;
+    num++;
+  }while (elapsed_seconds < 300);
+    
   freeaddrinfo(host_info_list);
   close(socket_fd);
   
