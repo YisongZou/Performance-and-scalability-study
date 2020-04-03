@@ -50,7 +50,7 @@ void threadFunc(int id, int num,int client_connection_fd){
   const char *result = temp.c_str();
   send(client_connection_fd, result, strlen(result), 0);
   close(client_connection_fd);
-  //cout <<"Number of request:" << num << " Server received: " << count << " " << position << endl;
+  //cout <<"Number of Request:" << num << " Server received: " << count << " " << position << endl;
   //num ++;
 }
 
@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
  int num = 1;
 
   //Pre create the threads
-  ctpl::thread_pool p(2000 /* 700 threads in the pool */);
+  ctpl::thread_pool p(600 /* 700 threads in the pool */);
   
-  //Check if the number of command line arguments is correct
+  //Check if the number of co mmand line arguments is correct
   if (argc != 2) {
     cerr << "Wrong number of command line arguments\n Usage: server <num_of_buckets>\n";
     exit(EXIT_FAILURE);
