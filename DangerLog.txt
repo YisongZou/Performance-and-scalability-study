@@ -1,0 +1,20 @@
+1.
+Problem Case: Some client threads will accidentially cannot connect to server due to too many threads at the same time.
+How we fixed it: We use a thread pool to restrict the thread numbers that the client side can create.
+2.
+Problem Case: When we nearly reach the highest throughput, the client side will have some threads that cannot connect to
+the server threads.
+How we fixed it: When some threads inside the client side cannot connect, we just let them to quit this loop and continue
+to connect the next time.
+3.
+Problem Case: The server side thread will quit acciedentially.
+How we fixed it: We find out that we forgot to detach the thread.
+4.
+Problem Case: There is no thread pool library in c++ stl
+How we fixed it: We find a good library to use called CTPL
+5.
+Problem Case: It is time consuming to test the throughput 5 minutes bu hand
+How we fixed it: We use a while loop which will loop for 5 minutes to test
+6.
+Problem Case: When too many client threads try to connect the server, server will crash.
+How we fixed it: After carefully testing, we figured out the best number of client threads for each way.
