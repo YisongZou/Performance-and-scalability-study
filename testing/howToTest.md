@@ -28,5 +28,8 @@ taskset --cpu-list 0-1 ./server <bucket number>
 To run the client for any version, cd into the src directory inside threadPerRequest or preCreateRequest and run:
 
 ```
-./client <bucket number>
+./client <hostname> <bucket number>
 ```
+
+The default setting: server run with 32 buckets and stop 5 minites after running.
+so please run client with: ./client vcm-xxxxx.vm.duke.edu 32
