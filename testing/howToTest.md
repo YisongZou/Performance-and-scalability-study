@@ -1,5 +1,5 @@
-### Create a thread per request version is inside the threadPerRequest directory
-### Pre-create a set of thread version is inside the preCreateRequest directory
+##### Create a thread per request version is inside the threadPerRequest directory
+##### Pre-create a set of thread version is inside the preCreateRequest directory
 
 To run any version server, sd into its folder where docker-compose.yml is in, run:
 
